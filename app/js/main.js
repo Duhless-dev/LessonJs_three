@@ -92,18 +92,28 @@ setTime('.timer');
 
 const modal = document.querySelector(".modal"),
 		modalBtn = document.querySelectorAll('[data-modal]'),
-		closeBtn = modal.querySelector(".modal__close");
+		modalContent = document.querySelector(".modal__content"),
+		inputs = modalContent.querySelectorAll(".modal__input"),
+		btnClose = modalContent.querySelector(".btn");
 
 
 		function modalClose(){
 			modal.style.display = "none";
 			document.body.style.overflow = "";
+			inputs.forEach(item =>{
+			item.style.display = "block";
+		});
+
+		btnClose.style.display = "block";
+
+		modalContent.querySelector(".modal__title").textContent = "Мы свяжемся с вами как можно быстрее!";	
 		}
 
 		function modalAdd(){
 			modal.style.display = "block";
 			document.body.style.overflow = "hidden";		
 		}
+
 		
 		
 		function showModalByScroll(){
@@ -121,10 +131,8 @@ const modal = document.querySelector(".modal"),
 				});
 			});
 
-		closeBtn.addEventListener("click", modalClose);
-
 		modal.addEventListener("click", (e) =>{
-			if (e.target && e.target == modal){
+			if (e.target && (e.target == modal || e.target.classList.contains('modal__close'))){
 				modalClose();
 			}
 		});
@@ -139,7 +147,7 @@ const modal = document.querySelector(".modal"),
 
 		window.addEventListener("scroll", showModalByScroll);
 
-});
+
 
 //!Динамические экземпляры Меню
 const menuField = document.querySelector(".menu__field"),
@@ -176,7 +184,6 @@ const menuFitnes = new MenuItem(
 menuFitnes.createMenuItem();
 
 
-
 const menuPremium = new MenuItem('img/tabs/elite.jpg', 'Премиум','В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!', '550');
 
 menuPremium.createMenuItem();
@@ -186,3 +193,68 @@ menuPremium.createMenuItem();
 const menuPost = new MenuItem('img/tabs/post.jpg', 'Постное','Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.', '430');
 
 menuPost.createMenuItem();
+
+		
+
+//!Формы - отправка данных
+
+const forms = document.querySelectorAll('form');
+    const message = {
+        loading: 'img/spinner.svg',
+        success: 'Спасибо! Сообщение отправлено!',
+        failure: 'Что-то пошло не так...'
+    };
+
+    forms.forEach(item => {
+        postData(item);
+	 });
+	 
+	 function modalSuccess(mess){
+		 
+		inputs.forEach(item =>{
+			item.style.display = "none";
+		});
+
+		btnClose.style.display = "none";
+
+		modalContent.querySelector(".modal__title").textContent = `${mess}`;
+
+	 }
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            let statusMessage = document.createElement('img');
+				statusMessage.style.display = "block";
+				statusMessage.style.margin = "30px auto";
+				statusMessage.src = message.loading;
+            form.insertAdjacentElement("afterend",statusMessage);
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            const formData = new FormData(form);
+
+            const object = {};
+            formData.forEach(function(value, key){
+                object[key] = value;
+            });
+            const json = JSON.stringify(object);
+
+            request.send(json);
+
+            request.addEventListener('load', () => {
+               if (request.status === 200) {
+               		console.log(request.response);
+               		modalSuccess(message.success, inputs, btnClose, modalContent);
+               		form.reset();
+               		statusMessage.remove();
+                } else {
+                    statusMessage.textContent = message.failure;
+                }
+				});
+        });
+	 }
+	
+	
+	
+});
