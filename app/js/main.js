@@ -229,7 +229,6 @@ const forms = document.querySelectorAll('form');
 				statusMessage.style.margin = "30px auto";
 				statusMessage.src = message.loading;
             form.insertAdjacentElement("afterend",statusMessage);
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             const formData = new FormData(form);
 
             const object = {};
