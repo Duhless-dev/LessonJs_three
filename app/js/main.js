@@ -229,8 +229,6 @@ const forms = document.querySelectorAll('form');
 				statusMessage.style.margin = "30px auto";
 				statusMessage.src = message.loading;
             form.insertAdjacentElement("afterend",statusMessage);
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
             request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
             const formData = new FormData(form);
 
@@ -238,23 +236,24 @@ const forms = document.querySelectorAll('form');
             formData.forEach(function(value, key){
                 object[key] = value;
             });
-            const json = JSON.stringify(object);
 
-            request.send(json);
-
-            request.addEventListener('load', () => {
-               if (request.status === 200) {
-               		console.log(request.response);
-               		modalSuccess(message.success, inputs, btnClose, modalContent);
-               		form.reset();
-               		statusMessage.remove();
-                } else {
-                    statusMessage.textContent = message.failure;
-                }
+            fetch('server.php',{
+					method: 'POST',
+					headers: {
+						'Content-type': 'application/json; charset=utf-8'
+					},
+					body: JSON.stringify(object)
+				}).then(data =>{
+					console.log(data);
+               modalSuccess(message.success, inputs, btnClose, modalContent);
+         		
+         		statusMessage.remove();
+				}).catch(() => {
+					statusMessage.textContent = message.failure;
+				}).finally(()=>{
+					form.reset();
 				});
         });
 	 }
-	
-	
-	
+		
 });
