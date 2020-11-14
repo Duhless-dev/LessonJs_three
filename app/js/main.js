@@ -169,35 +169,31 @@ class MenuItem{
 					<div class="menu__item-divider"></div>
 					<div class="menu__item-price">
 						<div class="menu__item-cost">Цена:</div>
-						<div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+						<div class="menu__item-total"><span>${(this.price * 28.2).toFixed(2)}</span> грн/день</div>
 					</div>`;
 		menuContainer.append(menuItem);
 	}
 }
 
-const menuFitnes = new MenuItem(
-	'img/tabs/vegy.jpg',
-	'Фитнес',
-	'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-	229);
 
-menuFitnes.createMenuItem();
-
-
-const menuPremium = new MenuItem('img/tabs/elite.jpg', 'Премиум','В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!', '550');
-
-menuPremium.createMenuItem();
-
-
-
-const menuPost = new MenuItem('img/tabs/post.jpg', 'Постное','Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.', '430');
-
-menuPost.createMenuItem();
-
+axios.get('http://localhost:3000/menu')
+	.then(data =>{
+		data.data.forEach(({img, title, descr, price}) =>{
+			new MenuItem(img, title, descr, price).createMenuItem();
+		});
+	});
 		
 
 //!Формы - отправка данных
-
+const postData = async(url, data) => {
+	const res = await fetch(url, {
+		method: "POST",
+		headers: {
+			'Content-type': "aplication/json"
+		},
+		body: data
+	});
+};
 const forms = document.querySelectorAll('form');
     const message = {
         loading: 'img/spinner.svg',
@@ -206,7 +202,7 @@ const forms = document.querySelectorAll('form');
     };
 
     forms.forEach(item => {
-        postData(item);
+        buildPostData(item);
 	 });
 	 
 	 function modalSuccess(mess){
@@ -220,7 +216,7 @@ const forms = document.querySelectorAll('form');
 		modalContent.querySelector(".modal__title").textContent = `${mess}`;
 
 	 }
-    function postData(form) {
+    function buildPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -235,24 +231,62 @@ const forms = document.querySelectorAll('form');
             formData.forEach(function(value, key){
                 object[key] = value;
             });
-
-            fetch('server.php',{
-					method: 'POST',
-					headers: {
-						'Content-type': 'application/json; charset=utf-8'
-					},
-					body: JSON.stringify(object)
-				}).then(data =>{
+			postData('server.php',JSON.stringify(object))
+				.then(data =>{
 					console.log(data);
-               modalSuccess(message.success, inputs, btnClose, modalContent);
+					modalSuccess(message.success, inputs, btnClose, modalContent);
          		
-         		statusMessage.remove();
-				}).catch(() => {
-					statusMessage.textContent = message.failure;
-				}).finally(()=>{
-					form.reset();
-				});
+					statusMessage.remove();
+					}).catch(() => {
+						statusMessage.textContent = message.failure;
+					}).finally(()=>{
+						form.reset();
+					});
         });
 	 }
+
+//!Cлайдер
+
+const sliderWrapper = document.querySelector(".offer__slider"),
+	slides = sliderWrapper.querySelectorAll(".offer__slide"),
+	arrowLeft = sliderWrapper.querySelector(".offer__slider-prev"),
+	arrowRight = sliderWrapper.querySelector(".offer__slider-next"),
+	slideId = sliderWrapper.querySelector("#current"),
+	slideTotal = sliderWrapper.querySelector("#total");
+
+	 let id = 1;
+
+	 function showHideSlide(index){
+		if(index > slides.length){
+			id = 1;
+		}
+		if(index < 1){
+			id = slides.length ;
+		 }
+
+		 slides.forEach((i)=>{
+			i.style.display = "none";
+		});
+
+		 slides[id-1].style.display = "block";
+		 slideId.textContent = getZero(id);
+		
+	 }
+
+	function changeSlide(n){
+		showHideSlide(id += n);
+	}
+
+
+	slideTotal.textContent = getZero(slides.length);
+	showHideSlide(id);
+
+	arrowRight.addEventListener('click',()=>{
+			changeSlide(1);
+	});
+
+	arrowLeft.addEventListener('click',()=>{
+			changeSlide(-1);		
+	});
 		
 });
