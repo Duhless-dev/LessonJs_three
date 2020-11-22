@@ -38,7 +38,7 @@ gulp.task('scss', function () {
 		.pipe(gulp.dest('app/css'))
 		.pipe(browserSync.reload({
 			stream: true
-		}))
+		}));
 });
 
 gulp.task('css', function () {
@@ -56,7 +56,7 @@ gulp.task('css', function () {
 		.pipe(gulp.dest('app/scss'))
 		.pipe(browserSync.reload({
 			stream: true
-		}))
+		}));
 });
 
 gulp.task('html', function () {
@@ -70,7 +70,7 @@ gulp.task('script', function () {
 	return gulp.src('app/js/**/*.js')
 		.pipe(browserSync.reload({
 			stream: true
-		}))
+		}));
 });
 
 gulp.task('js', function () {
